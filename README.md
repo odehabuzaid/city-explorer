@@ -1,4 +1,4 @@
-# Project Name
+# City Explorer
 
 **Author**: Odeh Abuzaid
 
@@ -9,7 +9,7 @@ this application is for finding the location on map, by entering the name of the
 
 
 ## Getting Started
-just navigate to : https://cityexplorer-o.netlify.app/ and enter the name of the city.
+just navigate to : https://cityexplorer-d28.netlify.app/ and enter the name of the city.
 
 ## Architecture
 
@@ -22,4 +22,33 @@ just navigate to : https://cityexplorer-o.netlify.app/ and enter the name of the
 
 ### Time Estimates
 
+Name of feature: 1. Set up your React repository & API keys.
 
+Estimate of time needed to complete:  30 min
+
+Start time:  8/8/2021 - 2:30 
+
+Finish time:  8/8/2021 - 2:45
+
+Actual time needed to complete:  15 min
+
+
+Name of feature: 2. Locations: As a user of City Explorer, I want to enter the name of a location so that I can see the exact latitude and longitude of that location.
+
+Estimate of time needed to complete:  30 min
+
+Start time:  8/8/2021 - 3:00
+
+Finish time:  8/8/2021 - 3:20
+
+Actual time needed to complete:  20 min
+
+Name of feature: 3. Map: As a user, I want to see a map of the city so that I can see the layout of the area I want to explore.
+
+Estimate of time needed to complete:  30 min
+
+Start time:  8/8/2021 - 3:20
+
+Finish time:  8/8/2021 - 3:40
+
+Actual time needed to complete:  20 min
