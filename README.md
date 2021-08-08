@@ -52,3 +52,14 @@ Start time:  8/8/2021 - 3:20
 Finish time:  8/8/2021 - 3:40
 
 Actual time needed to complete:  20 min
+
+
+Name of feature: 4. Errors: As a user, I want clear messages if something goes wrong so I know if I need to make any changes or try again in a different manner.
+
+Estimate of time needed to complete:  30 min
+
+Start time:  8/8/2021 - 4:20
+
+Finish time:  8/8/2021 - 5:00
+
+Actual time needed to complete:  40 min
