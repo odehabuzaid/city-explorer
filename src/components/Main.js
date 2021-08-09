@@ -1,12 +1,15 @@
 import React, { Component } from 'react';
-import { Container, Col, Row, Alert, Toast } from 'react-bootstrap';
+import { Container, Col, Row, Toast } from 'react-bootstrap';
 
 import axios from 'axios';
 import Header from './Header';
 import Map from './Map';
+import Weather from './Weather';
+
+const EXPRESS_SERVER = process.env.REACT_APP_SERVER_URL;
 
 export default class Main extends Component {
-  constructor( props ){
+  constructor( props ) {
     super( props );
     this.state = {
       searchQuery: '',
@@ -18,11 +21,10 @@ export default class Main extends Component {
       errorAlert: false,
       showToast: false,
       errorMsg: '',
-
+      weatherData: [],
+      showWeather: false,
     };
   }
-
-
   componentDidMount() {
     navigator.geolocation.getCurrentPosition(
       this.success,
@@ -45,56 +47,78 @@ export default class Main extends Component {
     } );
     this.getCity( crd.longitude, crd.latitude );
   };
-
   error = ( err ) => {
-    <Alert variant='danger'>
-      `ERROR(${err.code}): ${err.message}`
-    </Alert>;
     // console.warn();
   };
 
   getData = async ( e ) => {
     e.preventDefault();
     await this.setState( { searchQuery: e.target.searchText.value } );
-
     let searchURL = `https://eu1.locationiq.com/v1/search.php?key=${process.env.REACT_APP_LOCATIONIQ_KEY}&q=${this.state.searchQuery}&format=json`;
     try {
       let axiosResponse = await axios.get( searchURL );
-      // console.log( axiosResponse );
       await this.setState( {
         showMap: true,
         lat: axiosResponse.data[0].lat,
         lon: axiosResponse.data[0].lon,
-        display_name: axiosResponse.data[0].display_name,
         showToast: false,
       } );
+
+      await this.getCity( axiosResponse.data[0].lon, axiosResponse.data[0].lat );
+      this.getWeatherData(
+        axiosResponse.data[0].lon,
+        axiosResponse.data[0].lat,
+        this.state.display_name
+      );
     } catch ( error ) {
       await this.setState( {
-        errorMsg: error.response.status + ' the location not found',
+        errorMsg: ' the location not found',
         showToast: true,
       } );
     }
   };
 
-  getCity = async ( long,lat ) => {
+  getCity = async ( long, lat ) => {
     // reverse Lookup << :)
     let searchURL =
-      `https://us1.locationiq.com/v1/reverse.php?key=${process.env.REACT_APP_LOCATIONIQ_KEY}&lat=${lat}&lon=${long}` +
-      '&format=json';
-    let axiosResponse = await axios.get( searchURL );
-    //// console.log(axiosResponse)
-    await this.setState( {
-      display_name: axiosResponse.data.display_name,
-    } );
-
+      `https://us1.locationiq.com/v1/reverse.php?
+      key=${process.env.REACT_APP_LOCATIONIQ_KEY}
+      &lat=${lat}
+      &lon=${long}
+      &format=json`;
+    let response = await axios.get( searchURL );
+    if ( response.data.address.city ) {
+      await this.setState( {
+        display_name: response.data.address.city,
+      } );
+    } else {
+      await this.setState( {
+        display_name: response.data.display_name,
+      } );
+    }
   };
 
-  hideToast = () => {
-    this.setState( {
-      showToast: false,
-    } );
-  };
+  getWeatherData = ( long, lat, city ) => {
+    if ( EXPRESS_SERVER ) {
+      let locationURL = `${EXPRESS_SERVER}/weather/${long}/${lat}/${city}`;
+      axios
+        .get( locationURL )
+        .then( ( response ) => {
+          this.setState( {
+            weatherData: response.data,
+            showWeather: true,
+          } );
+        } )
+        .catch( ( error ) => {
+          this.setState( {
+            errorMsg: `${error}\n Weather Data Not Found For ${this.state.display_name}`,
+            showToast: true,
+            showWeather: false,
+          } );
+        } );
+    }
 
+  };
   render() {
     return (
       <>
@@ -102,22 +126,25 @@ export default class Main extends Component {
         <main>
           <Container fluid>
             <Row className='justify-content-md-center mb-4'>
-              {this.state.showToast && (
-                <Toast
-                  key='1'
-                  style={{ width: '100%' }}
-                  delay={1000}
-                  show={this.state.showToast}
-                  onClick={this.hideToast}
-                >
-                  <Toast.Header closeButton={false}>
-                    <strong className='me-auto'>ERROR</strong>
-                  </Toast.Header>
-                  <Toast.Body>
-                    Cannot get data : {this.state.errorMsg}
-                  </Toast.Body>
-                </Toast>
-              )}
+              <Col sm={10}>
+                {this.state.showToast && (
+                  <Toast
+                    key='1'
+                    delay={1000}
+                    show={this.state.showToast}
+                    onClick={() => { this.setState( { showToast: false, } );}}
+                    className="mt-4"
+                    style={{ width: '100%' }}
+                  >
+                    <Toast.Header closeButton={false}>
+                      <strong className='me-auto'>ERROR</strong>
+                    </Toast.Header>
+                    <Toast.Body>
+                      Cannot get data : {this.state.errorMsg}
+                    </Toast.Body>
+                  </Toast>
+                )}
+              </Col>
             </Row>
             <Row className='justify-content-md-center mb-4'>
               <Col sm={5}>
@@ -129,7 +156,17 @@ export default class Main extends Component {
                     lon={this.state.lon}
                   />
                 )}
-
+              </Col>
+              <Col sm={5} className='justify-content-md-center mt-4'>
+                {this.state.showWeather &&
+                  this.state.weatherData.map( ( day, index ) => (
+                    <Weather
+                      key={index}
+                      description={day.description}
+                      ForcastDate={day.ForcastDate}
+                    />
+                  ) )
+                }
               </Col>
             </Row>
           </Container>
