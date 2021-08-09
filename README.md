@@ -63,3 +63,28 @@ Start time:  8/8/2021 - 4:20
 Finish time:  8/8/2021 - 5:00
 
 Actual time needed to complete:  40 min
+
+# Lab 7
+
+Name of feature: 2. Weather (placeholder)
+
+Estimate of time needed to complete: 30 minutes
+
+Start time: 09/08/2021 4:15  pm
+
+Finish time: 09/08/2021 4:45 pm
+
+Actual time needed to complete: about 45 minutes
+
+
+Name of feature: 3. Errors (revisited)
+
+Estimate of time needed to complete: 30 minutes
+
+Start time: 09/08/2021 4:15  pm
+
+Finish time: 09/08/2021 05:00 pm
+
+Actual time needed to complete: about 15 minutes
+
+
