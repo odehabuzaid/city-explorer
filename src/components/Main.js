@@ -99,26 +99,24 @@ export default class Main extends Component {
   };
 
   getWeatherData = ( long, lat, city ) => {
-    if ( EXPRESS_SERVER ) {
-      let locationURL = `${EXPRESS_SERVER}/weather/${long}/${lat}/${city}`;
-      axios
-        .get( locationURL )
-        .then( ( response ) => {
-          this.setState( {
-            weatherData: response.data,
-            showWeather: true,
-          } );
-        } )
-        .catch( ( error ) => {
-          this.setState( {
-            errorMsg: `${error}\n Weather Data Not Found For ${this.state.display_name}`,
-            showToast: true,
-            showWeather: false,
-          } );
+    let locationURL = `${EXPRESS_SERVER}/weather/${long}/${lat}`;
+    axios
+      .get( locationURL )
+      .then( ( response ) => {
+        this.setState( {
+          weatherData: response.data,
+          showWeather: true,
         } );
-    }
-
+      } )
+      .catch( ( error ) => {
+        this.setState( {
+          errorMsg: `${error}\n Weather Data Not Found For ${this.state.display_name}`,
+          showToast: true,
+          showWeather: false,
+        } );
+      } );
   };
+
   render() {
     return (
       <>
@@ -163,7 +161,7 @@ export default class Main extends Component {
                     <Weather
                       key={index}
                       description={day.description}
-                      ForcastDate={day.ForcastDate}
+                      forcastDate={day.forcastDate}
                     />
                   ) )
                 }
