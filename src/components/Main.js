@@ -5,6 +5,7 @@ import axios from 'axios';
 import Header from './Header';
 import Map from './Map';
 import Weather from './Weather';
+import Movies from './Movies';
 
 const EXPRESS_SERVER = process.env.REACT_APP_SERVER_URL;
 
@@ -65,11 +66,6 @@ export default class Main extends Component {
       } );
 
       await this.getCity( axiosResponse.data[0].lon, axiosResponse.data[0].lat );
-      this.getWeatherData(
-        axiosResponse.data[0].lon,
-        axiosResponse.data[0].lat,
-        this.state.display_name
-      );
     } catch ( error ) {
       await this.setState( {
         errorMsg: ' the location not found',
@@ -80,8 +76,7 @@ export default class Main extends Component {
 
   getCity = async ( long, lat ) => {
     // reverse Lookup << :)
-    let searchURL =
-      `https://us1.locationiq.com/v1/reverse.php?
+    let searchURL = `https://us1.locationiq.com/v1/reverse.php?
       key=${process.env.REACT_APP_LOCATIONIQ_KEY}
       &lat=${lat}
       &lon=${long}
@@ -96,9 +91,12 @@ export default class Main extends Component {
         display_name: response.data.display_name,
       } );
     }
+
+    this.getMoviesData( response.data.address.country_code );
+    this.getWeatherData( long, lat );
   };
 
-  getWeatherData = ( long, lat, city ) => {
+  getWeatherData = async ( long, lat, city ) => {
     let locationURL = `${EXPRESS_SERVER}/weather/${long}/${lat}`;
     axios
       .get( locationURL )
@@ -117,6 +115,54 @@ export default class Main extends Component {
       } );
   };
 
+  getMoviesData = async ( countrycode ) => {
+    let requestURL = `${process.env.REACT_APP_SERVER_URL}/movies/${countrycode}`;
+    axios
+      .get( requestURL )
+      .then( ( response ) => {
+        this.setState( { moviesData: response.data } );
+      } )
+      .catch( ( error ) => {
+        this.setState( {
+          errorMsg:
+            'Error : ( ' +
+            error.response.status +
+            ` ) No Movies Data ${this.state.display_name}`,
+          showToast: true,
+        } );
+      } );
+  };
+
+  startCardRendering = ( array ) => {
+    return (
+      <>
+        {this.renderCards( array.slice( 0, 5 ) )}
+        <div class='w-100'></div>
+        {this.renderCards( array.slice( 5, 10 ) )}
+        <div class='w-100'></div>
+        {this.renderCards( array.slice( 10, 15 ) )}
+        <div class='w-100'></div>
+        {this.renderCards( array.slice( 15, 20 ) )}
+      </>
+    );
+  };
+  renderCards = ( cardsArray ) => {
+    return cardsArray.map( ( movie, index ) => (
+      <Col key={index} className='m-4'>
+        {
+          <Movies
+            released_on={movie.released_on}
+            title={movie.title}
+            overview={movie.overview}
+            average_votes={movie.average_votes}
+            total_votes={movie.total_votes}
+            image_url={movie.image_url}
+            popularity={movie.popularity}
+          />
+        }
+      </Col>
+    ) );
+  };
   render() {
     return (
       <>
@@ -130,8 +176,10 @@ export default class Main extends Component {
                     key='1'
                     delay={1000}
                     show={this.state.showToast}
-                    onClick={() => { this.setState( { showToast: false, } );}}
-                    className="mt-4"
+                    onClick={() => {
+                      this.setState( { showToast: false } );
+                    }}
+                    className='mt-4'
                     style={{ width: '100%' }}
                   >
                     <Toast.Header closeButton={false}>
@@ -163,10 +211,16 @@ export default class Main extends Component {
                       description={day.description}
                       forcastDate={day.forcastDate}
                     />
-                  ) )
-                }
+                  ) )}
               </Col>
             </Row>
+            <Container
+              className='d-flex'
+              style={{ flexWrap: 'wrap', minWidth: '300px' }}
+            >
+              {this.state.moviesData &&
+                this.startCardRendering( this.state.moviesData )}
+            </Container>
           </Container>
         </main>
       </>
