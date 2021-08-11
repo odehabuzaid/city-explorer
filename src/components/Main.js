@@ -5,7 +5,8 @@ import axios from 'axios';
 import Header from './Header';
 import Map from './Map';
 import Weather from './Weather';
-import Movies from './Movies';
+
+import {startCardRendering} from '../helpers/functions';
 
 const EXPRESS_SERVER = process.env.REACT_APP_SERVER_URL;
 
@@ -14,44 +15,42 @@ export default class Main extends Component {
     super( props );
     this.state = {
       searchQuery: '',
-      locationData: {},
       showMap: true,
       lat: 0,
       lon: 0,
       display_name: '',
-      errorAlert: false,
       showToast: false,
       errorMsg: '',
-      weatherData: [],
-      showWeather: false,
     };
   }
+
   componentDidMount() {
-    navigator.geolocation.getCurrentPosition(
-      this.success,
-      this.error,
-      this.options
-    );
+    this.getCurrentLocation();
   }
 
-  options = {
-    enableHighAccuracy: true,
-    timeout: 5000,
-    maximumAge: 0,
-  };
-
-  success = ( pos ) => {
-    let crd = pos.coords;
-    this.setState( {
-      lat: crd.latitude,
-      lon: crd.longitude,
-    } );
-    this.getCity( crd.longitude, crd.latitude );
-  };
-  error = ( err ) => {
-    // console.warn();
-  };
-
+  getCurrentLocation(){
+    const options = {
+      enableHighAccuracy: true,
+      timeout: 5000,
+      maximumAge: 0,
+    };
+    let success = ( pos ) => {
+      let crd = pos.coords;
+      this.setState( {
+        lat: crd.latitude,
+        lon: crd.longitude,
+      } );
+      this.getCity( crd.longitude, crd.latitude );
+    };
+    let error = ( err ) => {
+      // console.warn();
+    };
+    navigator.geolocation.getCurrentPosition(
+      success,
+      error,
+      options
+    );
+  }
   getData = async ( e ) => {
     e.preventDefault();
     await this.setState( { searchQuery: e.target.searchText.value } );
@@ -70,10 +69,11 @@ export default class Main extends Component {
       await this.setState( {
         errorMsg: ' the location not found',
         showToast: true,
+        showMap: false,
+        showWeather: false,
       } );
     }
   };
-
   getCity = async ( long, lat ) => {
     // reverse Lookup << :)
     let searchURL = `https://us1.locationiq.com/v1/reverse.php?
@@ -95,7 +95,6 @@ export default class Main extends Component {
     this.getMoviesData( response.data.address.country_code );
     this.getWeatherData( long, lat );
   };
-
   getWeatherData = async ( long, lat, city ) => {
     let locationURL = `${EXPRESS_SERVER}/weather/${long}/${lat}`;
     axios
@@ -114,7 +113,6 @@ export default class Main extends Component {
         } );
       } );
   };
-
   getMoviesData = async ( countrycode ) => {
     let requestURL = `${process.env.REACT_APP_SERVER_URL}/movies/${countrycode}`;
     axios
@@ -133,36 +131,6 @@ export default class Main extends Component {
       } );
   };
 
-  startCardRendering = ( array ) => {
-    return (
-      <>
-        {this.renderCards( array.slice( 0, 5 ) )}
-        <div class='w-100'></div>
-        {this.renderCards( array.slice( 5, 10 ) )}
-        <div class='w-100'></div>
-        {this.renderCards( array.slice( 10, 15 ) )}
-        <div class='w-100'></div>
-        {this.renderCards( array.slice( 15, 20 ) )}
-      </>
-    );
-  };
-  renderCards = ( cardsArray ) => {
-    return cardsArray.map( ( movie, index ) => (
-      <Col key={index} className='m-4'>
-        {
-          <Movies
-            released_on={movie.released_on}
-            title={movie.title}
-            overview={movie.overview}
-            average_votes={movie.average_votes}
-            total_votes={movie.total_votes}
-            image_url={movie.image_url}
-            popularity={movie.popularity}
-          />
-        }
-      </Col>
-    ) );
-  };
   render() {
     return (
       <>
@@ -219,7 +187,7 @@ export default class Main extends Component {
               style={{ flexWrap: 'wrap', minWidth: '300px' }}
             >
               {this.state.moviesData &&
-                this.startCardRendering( this.state.moviesData )}
+               startCardRendering( this.state.moviesData )}
             </Container>
           </Container>
         </main>
