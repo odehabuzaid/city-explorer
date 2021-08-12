@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
-import { Container, Col, Row, Toast } from 'react-bootstrap';
+import { Container } from 'react-bootstrap';
 
 import axios from 'axios';
 import Header from './Header';
 import Map from './Map';
-import Weather from './Weather';
+import BsAlert from './BsAlert';
+import Loading from './Loading';
 
-import {startCardRendering} from '../helpers/functions';
-
+import { startCardRendering } from '../helpers/functions';
 const EXPRESS_SERVER = process.env.REACT_APP_SERVER_URL;
 
 export default class Main extends Component {
@@ -21,14 +21,19 @@ export default class Main extends Component {
       display_name: '',
       showToast: false,
       errorMsg: '',
+      showWeather: false,
+      weatherData: [],
+      showMovies : false,
+      loading: false,
     };
   }
 
   componentDidMount() {
+    this.setState( { loading: true } );
     this.getCurrentLocation();
   }
 
-  getCurrentLocation(){
+  getCurrentLocation() {
     const options = {
       enableHighAccuracy: true,
       timeout: 5000,
@@ -45,14 +50,11 @@ export default class Main extends Component {
     let error = ( err ) => {
       // console.warn();
     };
-    navigator.geolocation.getCurrentPosition(
-      success,
-      error,
-      options
-    );
+    navigator.geolocation.getCurrentPosition( success, error, options );
   }
   getData = async ( e ) => {
     e.preventDefault();
+    this.setState( { loading: true } );
     await this.setState( { searchQuery: e.target.searchText.value } );
     let searchURL = `https://eu1.locationiq.com/v1/search.php?key=${process.env.REACT_APP_LOCATIONIQ_KEY}&q=${this.state.searchQuery}&format=json`;
     try {
@@ -63,7 +65,6 @@ export default class Main extends Component {
         lon: axiosResponse.data[0].lon,
         showToast: false,
       } );
-
       await this.getCity( axiosResponse.data[0].lon, axiosResponse.data[0].lat );
     } catch ( error ) {
       await this.setState( {
@@ -71,6 +72,7 @@ export default class Main extends Component {
         showToast: true,
         showMap: false,
         showWeather: false,
+        showMovies : false,
       } );
     }
   };
@@ -103,6 +105,7 @@ export default class Main extends Component {
         this.setState( {
           weatherData: response.data,
           showWeather: true,
+          loading : false,
         } );
       } )
       .catch( ( error ) => {
@@ -110,6 +113,7 @@ export default class Main extends Component {
           errorMsg: `${error}\n Weather Data Not Found For ${this.state.display_name}`,
           showToast: true,
           showWeather: false,
+          loading : false,
         } );
       } );
   };
@@ -118,7 +122,9 @@ export default class Main extends Component {
     axios
       .get( requestURL )
       .then( ( response ) => {
-        this.setState( { moviesData: response.data } );
+        this.setState( {
+          moviesData: response.data ,
+          showMovies : true} );
       } )
       .catch( ( error ) => {
         this.setState( {
@@ -127,6 +133,7 @@ export default class Main extends Component {
             error.response.status +
             ` ) No Movies Data ${this.state.display_name}`,
           showToast: true,
+          showMovies : false
         } );
       } );
   };
@@ -135,62 +142,33 @@ export default class Main extends Component {
     return (
       <>
         <Header getData={this.getData} />
-        <main>
-          <Container fluid>
-            <Row className='justify-content-md-center mb-4'>
-              <Col sm={10}>
-                {this.state.showToast && (
-                  <Toast
-                    key='1'
-                    delay={1000}
-                    show={this.state.showToast}
-                    onClick={() => {
-                      this.setState( { showToast: false } );
-                    }}
-                    className='mt-4'
-                    style={{ width: '100%' }}
-                  >
-                    <Toast.Header closeButton={false}>
-                      <strong className='me-auto'>ERROR</strong>
-                    </Toast.Header>
-                    <Toast.Body>
-                      Cannot get data : {this.state.errorMsg}
-                    </Toast.Body>
-                  </Toast>
-                )}
-              </Col>
-            </Row>
-            <Row className='justify-content-md-center mb-4'>
-              <Col sm={5}>
-                {this.state.showMap && (
-                  <Map
-                    cityName={this.state.display_name}
-                    imgsrc={`https://maps.locationiq.com/v3/staticmap?key=${process.env.REACT_APP_LOCATIONIQ_KEY}&center=${this.state.lat},${this.state.lon}&zoom=16&path=fillcolor:%2390EE90|weight:2|color:blue|${this.state.lat}|${this.state.lon}`}
-                    lat={this.state.lat}
-                    lon={this.state.lon}
-                  />
-                )}
-              </Col>
-              <Col sm={5} className='justify-content-md-center mt-4'>
-                {this.state.showWeather &&
-                  this.state.weatherData.map( ( day, index ) => (
-                    <Weather
-                      key={index}
-                      description={day.description}
-                      forcastDate={day.forcastDate}
-                    />
-                  ) )}
-              </Col>
-            </Row>
+        {this.state.loading ? <Loading/> :
+          <main>
+            <Container fluid>
+              {this.state.showToast && (
+                <BsAlert toggel={true} errorMsg={this.state.error} />
+              )}
+              {this.state.showMap && (
+                <Map
+                  cityName={this.state.display_name}
+                  imgsrc={`https://maps.locationiq.com/v3/staticmap?key=${process.env.REACT_APP_LOCATIONIQ_KEY}
+                &center=${this.state.lat},${this.state.lon}
+                &zoom=16`}
+                  lat={this.state.lat}
+                  lon={this.state.lon}
+                  showWeather={this.state.showWeather}
+                  weatherData={this.state.weatherData}
+                />
+              )}
+              {this.state.showMovies &&
             <Container
               className='d-flex'
               style={{ flexWrap: 'wrap', minWidth: '300px' }}
             >
-              {this.state.moviesData &&
-               startCardRendering( this.state.moviesData )}
+              {startCardRendering( this.state.moviesData )}
+            </Container>}
             </Container>
-          </Container>
-        </main>
+          </main>}
       </>
     );
   }
