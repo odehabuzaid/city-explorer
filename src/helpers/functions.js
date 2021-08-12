@@ -6,11 +6,11 @@ export function startCardRendering( array ) {
   return (
     <>
       {renderCards( array.slice( 0, 5 ) )}
-      <div class='w-100'></div>
+      <div className='w-100'></div>
       {renderCards( array.slice( 5, 10 ) )}
-      <div class='w-100'></div>
+      <div className='w-100'></div>
       {renderCards( array.slice( 10, 15 ) )}
-      <div class='w-100'></div>
+      <div className='w-100'></div>
       {renderCards( array.slice( 15, 20 ) )}
     </>
   );
