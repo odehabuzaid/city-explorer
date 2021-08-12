@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Col, Row, Toast } from 'react-bootstrap';
 
-export default class BsAlert extends Component {
+export default class BSalert extends Component {
   constructor( props ) {
     super( props );
     this.state = {

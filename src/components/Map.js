@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
-import { Card, Button, Col, Row } from 'react-bootstrap';
+import { Card, Button, Col, Row,Alert } from 'react-bootstrap';
 
 import Weather from './Weather';
+
+
 export default class Map extends Component {
   render() {
     const { imgsrc, lon, lat, showWeather, weatherData } = this.props;
@@ -24,8 +26,15 @@ export default class Map extends Component {
           </Card>
         </Col>
         <Col sm={5} className='justify-content-md-center mt-4'>
+          <Col>
+            <Row>
+              <Alert variant={'success'}>
+                {`Weather data of : ${new Date( weatherData.timestamp )}`}
+              </Alert>
+            </Row>
+          </Col>
           {showWeather &&
-            weatherData.map( ( day, index ) => (
+            weatherData.data.map( ( day, index ) => (
               <Weather
                 key={index}
                 description={day.description}

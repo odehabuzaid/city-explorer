@@ -1,8 +1,8 @@
 
-import Movies from '../components/Movies';
+import Movies from '../Movies';
 import {Col} from 'react-bootstrap';
 
-export function startCardRendering( array ) {
+export function handleCardRendering( array ) {
   return (
     <>
       {renderCards( array.slice( 0, 5 ) )}
