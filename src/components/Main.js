@@ -4,13 +4,16 @@ import { Container } from 'react-bootstrap';
 import axios from 'axios';
 import Header from './Header';
 import Map from './Map';
-import BsAlert from './BsAlert';
+import BSalert from './BSalert';
 import Loading from './Loading';
 
-import { startCardRendering } from '../helpers/functions';
-const EXPRESS_SERVER = process.env.REACT_APP_SERVER_URL;
+import {getWeatherData,getMoviesData ,getData} from './functions/dataRequests';
+import { handleCardRendering } from './movies/RenderCards';
+
+
 
 export default class Main extends Component {
+
   constructor( props ) {
     super( props );
     this.state = {
@@ -26,11 +29,16 @@ export default class Main extends Component {
       showMovies : false,
       loading: false,
     };
+    this.getWeatherData = getWeatherData.bind( this );
+    this.getMoviesData = getMoviesData.bind( this );
+    this.getData = getData.bind( this );
+
   }
 
   componentDidMount() {
     this.setState( { loading: true } );
     this.getCurrentLocation();
+
   }
 
   getCurrentLocation() {
@@ -52,30 +60,7 @@ export default class Main extends Component {
     };
     navigator.geolocation.getCurrentPosition( success, error, options );
   }
-  getData = async ( e ) => {
-    e.preventDefault();
-    this.setState( { loading: true } );
-    await this.setState( { searchQuery: e.target.searchText.value } );
-    let searchURL = `https://eu1.locationiq.com/v1/search.php?key=${process.env.REACT_APP_LOCATIONIQ_KEY}&q=${this.state.searchQuery}&format=json`;
-    try {
-      let axiosResponse = await axios.get( searchURL );
-      await this.setState( {
-        showMap: true,
-        lat: axiosResponse.data[0].lat,
-        lon: axiosResponse.data[0].lon,
-        showToast: false,
-      } );
-      await this.getCity( axiosResponse.data[0].lon, axiosResponse.data[0].lat );
-    } catch ( error ) {
-      await this.setState( {
-        errorMsg: ' the location not found',
-        showToast: true,
-        showMap: false,
-        showWeather: false,
-        showMovies : false,
-      } );
-    }
-  };
+
   getCity = async ( long, lat ) => {
     // reverse Lookup << :)
     let searchURL = `https://us1.locationiq.com/v1/reverse.php?
@@ -97,46 +82,7 @@ export default class Main extends Component {
     this.getMoviesData( response.data.address.country_code );
     this.getWeatherData( long, lat );
   };
-  getWeatherData = async ( long, lat, city ) => {
-    let locationURL = `${EXPRESS_SERVER}/weather/${long}/${lat}`;
-    axios
-      .get( locationURL )
-      .then( ( response ) => {
-        this.setState( {
-          weatherData: response.data,
-          showWeather: true,
-          loading : false,
-        } );
-      } )
-      .catch( ( error ) => {
-        this.setState( {
-          errorMsg: `${error}\n Weather Data Not Found For ${this.state.display_name}`,
-          showToast: true,
-          showWeather: false,
-          loading : false,
-        } );
-      } );
-  };
-  getMoviesData = async ( countrycode ) => {
-    let requestURL = `${process.env.REACT_APP_SERVER_URL}/movies/${countrycode}`;
-    axios
-      .get( requestURL )
-      .then( ( response ) => {
-        this.setState( {
-          moviesData: response.data ,
-          showMovies : true} );
-      } )
-      .catch( ( error ) => {
-        this.setState( {
-          errorMsg:
-            'Error : ( ' +
-            error.response.status +
-            ` ) No Movies Data ${this.state.display_name}`,
-          showToast: true,
-          showMovies : false
-        } );
-      } );
-  };
+
 
   render() {
     return (
@@ -146,7 +92,7 @@ export default class Main extends Component {
           <main>
             <Container fluid>
               {this.state.showToast && (
-                <BsAlert toggel={true} errorMsg={this.state.error} />
+                <BSalert toggel={true} errorMsg={this.state.error} />
               )}
               {this.state.showMap && (
                 <Map
@@ -165,7 +111,7 @@ export default class Main extends Component {
               className='d-flex'
               style={{ flexWrap: 'wrap', minWidth: '300px' }}
             >
-              {startCardRendering( this.state.moviesData )}
+              {handleCardRendering( this.state.moviesData )}
             </Container>}
             </Container>
           </main>}
