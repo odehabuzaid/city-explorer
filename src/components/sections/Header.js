@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import Logo from './assets/logo.png';
+import Logo from 'components/assets/logo.png';
 import {
   Navbar,
   Container,

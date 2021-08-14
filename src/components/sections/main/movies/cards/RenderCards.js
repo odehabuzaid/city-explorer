@@ -18,7 +18,11 @@ export function handleCardRendering( array ) {
 
 export function renderCards( cardsArray ) {
   return cardsArray.map( ( movie, index ) => (
-    <Col key={index} className='m-4'>
+    <Col
+      data-aos='slide-up'
+      data-aos-offset= '250'
+      key={index}
+      className='m-4'>
       {
         <Movies
           released_on={movie.released_on}

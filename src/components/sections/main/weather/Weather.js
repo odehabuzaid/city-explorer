@@ -5,11 +5,10 @@ export default class Weather extends Component {
   render() {
     const { description, forcastDate} = this.props;
     return (
-      <Card className='shadow mb-2' >
-
+      <Card data-aos='slide-up'
+        data-aos-offset= '2' className='shadow mb-2' >
         <Card.Body>
-
-          <Col>
+          <Col >
             <Row>{forcastDate}</Row>
             <Row>{'  '}</Row>
             <Row>{description}</Row>

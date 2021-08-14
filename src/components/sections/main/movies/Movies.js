@@ -13,7 +13,8 @@ export default class Movies extends Component {
       popularity,
     } = this.props;
     return (
-      <Row style={{ padding: '0px' }}>
+      <Row
+        style={{ padding: '0px' }}>
         <Card className='shadow' style={{ padding: '0px', width: '100%' }}>
           <Card.Header>
             {title} | {released_on} - Popularity : {popularity}
