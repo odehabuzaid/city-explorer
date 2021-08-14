@@ -1,19 +1,20 @@
 import React, { Component } from 'react';
 import { Card, Button, Col, Row,Alert } from 'react-bootstrap';
 
-import Weather from './Weather';
-
+import Weather from 'components/sections/main/weather/Weather';
 
 export default class Map extends Component {
   render() {
-    const { imgsrc, lon, lat, showWeather, weatherData } = this.props;
+    const { lon, lat, weatherData,cityName } = this.props;
     return (
       <Row className='justify-content-md-center mb-4 mt-2'>
-        <Col sm={5}>
+        <Col sm={5}
+          data-aos='slide-up'
+          data-aos-offset='400'>
           <Card className='shadow'>
-            <Card.Header>{this.props.cityName}</Card.Header>
+            <Card.Header>{cityName}</Card.Header>
             <Card.Body style={{ padding: '0px', margin: '0px' }}>
-              <Card.Img variant='top' src={imgsrc} alt='no data' />
+              <Card.Img variant='top' src={`${process.env.REACT_APP_MAP_URL}&center=${lat},${lon}&zoom=16`} alt='no data' />
               <Card.Footer style={{ margin: '0px', padding: '4px' }}>
                 <Button disabled className='m-2' variant='warning'>
                   Latitude: {lat}
@@ -33,14 +34,13 @@ export default class Map extends Component {
               </Alert>
             </Row>
           </Col>
-          {showWeather &&
-            weatherData.data.map( ( day, index ) => (
-              <Weather
-                key={index}
-                description={day.description}
-                forcastDate={day.forcastDate}
-              />
-            ) )}
+          {weatherData.data.map( ( day, index ) => (
+            <Weather
+              key={index}
+              description={day.description}
+              forcastDate={day.forcastDate}
+            />
+          ) )}
         </Col>
       </Row>
     );
