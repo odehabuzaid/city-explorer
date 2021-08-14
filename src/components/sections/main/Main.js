@@ -48,9 +48,7 @@ export default class Main extends React.Component {
     Aos.init( { duration: 500 } );
   }
 
-  componentDidUpdate() {
-    Aos.init( { duration: 500 } );
-  }
+
   render() {
     return (
       <>
